@@ -1,4 +1,3 @@
-include(../mumble.pri)
 TEMPLATE = app
 TARGET = actd
 HEADERS = mainwindow.h \
@@ -24,4 +23,3 @@ ICON = actd.icns
 CONFIG += console 
 QT += xml
 
-include(../../symbols.pri)
