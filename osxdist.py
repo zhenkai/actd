@@ -93,9 +93,9 @@ class AppBundle(object):
 
 		self.handle_binary_libs()
 
-		actd = os.path.join(os.path.abspath(self.bundle), 'Contents', 'MacOS', 'actd')
-		if os.path.exists(actd):
-			self.handle_binary_libs(actd)
+		#actd = os.path.join(os.path.abspath(self.bundle), 'Contents', 'MacOS', 'actd')
+		#if os.path.exists(actd):
+		#	self.handle_binary_libs(actd)
 
 	def handle_binary_libs(self, macho=None):
 		'''
@@ -303,7 +303,7 @@ if __name__ == '__main__':
 	a = AppBundle('actd.app', ver)
 	a.copy_qt_plugins()
 	a.handle_libs()
-	a.copy_resources(['actd.icns'])
+	a.copy_resources(['actd.icns', 'qt.conf'])
 	a.update_plist()
 	if not options.universal:
 		a.set_min_macosx_version('10.5.0')
