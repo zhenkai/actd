@@ -132,9 +132,15 @@ void MainWindow::processItem(){
 	}
 	if (a->getAudio())
 		joinAudioButton->setEnabled(true);
+	else
+		joinAudioButton->setEnabled(false);
 	if (a->getVideo())
 		joinVideoButton->setEnabled(true);
-	QString desc = current->data(3, Qt::UserRole).toString();
+	else
+		joinVideoButton->setEnabled(false);
+
+	//QString desc = current->data(3, Qt::UserRole).toString();
+	QString desc = a->getDesc();
 	confDesc->setPlainText(desc);
 
 }
@@ -375,7 +381,7 @@ void MainWindow::addConferenceToList(Announcement *announce) {
 	
 	QString desc = QString("Date: %1\nTime: %2\nDuration: %3 Hours %4 Minutes\n-------------------------------\n%5").arg(date).arg(start).arg(hours).arg(minutes).arg(oDesc);
 
-	item->setData(4, Qt::UserRole, desc);
+	//item->setData(4, Qt::UserRole, desc);
 	
 	item->setText(5, announce->getOrganizer());
 	item->setText(6, announce->getEmail());
