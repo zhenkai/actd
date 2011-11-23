@@ -165,8 +165,8 @@ ConfigPage::ConfigPage(QWidget *parent)
 	emailLineEdit = new QLineEdit;
 	emailLabel->setBuddy(emailLineEdit);
 
-	videoCheckBox = new QCheckBox(tr("Enable Video"));
 	audioCheckBox = new QCheckBox(tr("Enable Audio"));
+	videoCheckBox = new QCheckBox(tr("Enable Video"));
 	textCheckBox = new QCheckBox(tr("Enable Text"));
 	privateConfBox = new QCheckBox(tr("Private Conference"));
 
@@ -223,8 +223,8 @@ ConfigPage::ConfigPage(QWidget *parent)
 	layout->addWidget(organizerLineEdit, 1, 1);
 	layout->addWidget(emailLabel, 2, 0);
 	layout->addWidget(emailLineEdit, 2, 1);
-	layout->addWidget(videoCheckBox, 3, 0);
-	layout->addWidget(audioCheckBox, 3, 1);
+	layout->addWidget(audioCheckBox, 3, 0);
+	layout->addWidget(videoCheckBox, 3, 1);
 	layout->addWidget(textCheckBox, 4, 0);
 	layout->addWidget(privateConfBox, 4, 1);
 	layout->addWidget(dateLabel, 5, 0);

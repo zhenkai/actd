@@ -66,6 +66,7 @@ void Announcement::copy(Announcement *a) {
 	this->email = a->email;
 	this->audio = a->audio;
 	this->video = a->video;
+	this->text = a->text;
 	this->desc = a->desc;
 	this->date = a->date;
 	this->time = a->time;
@@ -99,6 +100,7 @@ QString &operator<<(QString &out, Announcement *a) {
 	
 	bool audio = a->getAudio();
 	bool video = a->getVideo();
+	bool text = a->getText();
 	QString confName = a->getConfName();
 	QString organizer = a->getOrganizer();
 	QString email = a->getEmail();
@@ -188,6 +190,13 @@ QDomDocument &operator>>(QDomDocument &in, Announcement *a) {
 				a->setVideo(true);
 			else
 				a->setVideo(false);
+		} else
+		if (attr == "text") {
+			QString bText = node.toElement().text();
+			if (bText == "true") 
+				a->setText(true);
+			else
+				a->setText(false);
 		} else
 		if (attr == "confName") {
 			QString confName = node.toElement().text();
