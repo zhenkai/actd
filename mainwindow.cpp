@@ -45,8 +45,10 @@ MainWindow::MainWindow(char *argv[], QWidget *parent)
 	exportCertButton = new QPushButton(tr("Export Cert"));
 	quitButton = new QPushButton(tr("Quit"));
 
-	joinButton = new QPushButton(tr("Join"));
-	joinButton->setEnabled(false);
+	joinAudioButton = new QPushButton(tr("Join Audio Session"));
+	joinAudioButton->setEnabled(false);
+	joinVideoButton = new QPushButton(tr("Join Video Session"));
+	joinVideoButton->setEnabled(false);
 	dismissButton = new QPushButton(tr("Dismiss"));
 	dismissButton->setEnabled(false);
 
@@ -61,7 +63,8 @@ MainWindow::MainWindow(char *argv[], QWidget *parent)
 	
 
 	footButtonBox = new QDialogButtonBox;
-	footButtonBox->addButton(joinButton, QDialogButtonBox::ActionRole);
+	footButtonBox->addButton(joinAudioButton, QDialogButtonBox::ActionRole);
+	footButtonBox->addButton(joinVideoButton, QDialogButtonBox::ActionRole);
 	footButtonBox->addButton(dismissButton, QDialogButtonBox::ActionRole);
 
 	QHBoxLayout *midLayout = new QHBoxLayout;
@@ -84,7 +87,8 @@ MainWindow::MainWindow(char *argv[], QWidget *parent)
 	connect(prefButton, SIGNAL(clicked()), this, SLOT(changePref()));
 	connect(exportCertButton, SIGNAL(clicked()), this, SLOT(exportCert()));
 	connect(quitButton, SIGNAL(clicked()), this, SLOT(close()));
-	connect(joinButton, SIGNAL(clicked()), this, SLOT(joinConference()));
+	connect(joinAudioButton, SIGNAL(clicked()), this, SLOT(joinAudioConference()));
+	connect(joinVideoButton, SIGNAL(clicked()), this, SLOT(joinVideoConference()));
 	connect(dismissButton, SIGNAL(clicked()), this, SLOT(dismissConference()));
 	connect(pubConfList, SIGNAL(currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)), this, SLOT(processItem()));
 	
@@ -114,20 +118,22 @@ void MainWindow::processItem(){
 		pubConfList->setEnabled(false);
 		confDesc->clear();
 		confDesc->setEnabled(false);
-		joinButton->setEnabled(false);
+		joinAudioButton->setEnabled(false);
+		joinVideoButton->setEnabled(false);
 		dismissButton->setEnabled(false);
 		return;
 	}
 	
 	Announcement *a = itemToAnnouncement[current];
 	if (a->getOwner()) {
-		joinButton->setEnabled(true);
 		dismissButton->setEnabled(true);
-
 	} else {
-		joinButton->setEnabled(true);
 		dismissButton->setEnabled(false);
 	}
+	if (a->getAudio())
+		joinAudioButton->setEnabled(true);
+	if (a->getVideo())
+		joinVideoButton->setEnabled(true);
 	QString desc = current->data(3, Qt::UserRole).toString();
 	confDesc->setPlainText(desc);
 
@@ -202,111 +208,106 @@ void MainWindow::changePref() {
 	}
 }
 
-void MainWindow::joinConference() {
-
-	mumbleCleanup();
-
+void MainWindow::writeConfig() {
 	QTreeWidgetItem *current = pubConfList->currentItem();	
 	if (!current) {
 		critical("current is null");
 	}
 
 	QString confName = current->text(3);
-	if (true) {
-
-
-		QString qsConfig = "<config><prefix>" + prefix + "</prefix><confName>";
-
-
-		
-		Announcement *a = itemToAnnouncement[current];
-		if (a->getIsPrivate()) {
-			qsConfig += a->getOpaqueName() + "</confName>";
-			qsConfig += "<private>true</private>";
-			QByteArray confKey((const char *)a->conferenceKey, (int)sizeof(a->conferenceKey));	
-			QString qsConfKey = QString(confKey.toBase64());
-			qsConfig += "<confKey>" + qsConfKey + "</confKey>";
-			QByteArray sessionKey((const char *)a->audioSessionKey, (int)sizeof(a->audioSessionKey));
-			QString qsSessionKey = QString(sessionKey.toBase64());
-			qsConfig += "<sessionKey>" + qsSessionKey + "</sessionKey>";
-		}
-		else {
-			qsConfig += confName + "</confName>";
-			qsConfig += "<private>false</private>";
-		}
-		qsConfig += "<channelName>" + confName + "</channelName>";
-		qsConfig += "</config>";
-
-		QDomDocument doc;
-		QDir actDir(QDir::homePath() + "/" + ".actd");
-		if (!actDir.exists()) {
-			QDir homedir = QDir::home();
-			homedir.mkdir(".actd");
-		}
-		QString fileName = actDir.absolutePath() + "/" + ".config";
-		QFile config(fileName);
-		if (config.exists()) {
-			config.remove();
-		}
-
-		config.open(QIODevice::WriteOnly | QIODevice::Truncate);
-		QTextStream out (&config);
-
-		out << qsConfig;
-		// flush, maybe not needed, but sometimes release version of murmurd on iMac
-		// uses old conference name
-		config.flush();
-		config.close();
-
-		if (a->getAudio()) {
-			audioProcess = new QProcess(this);
-			mumbleProcess = new QProcess(this);
-
-#ifdef QT_NO_DEBUG
-#ifdef __APPLE__
-			audioPath = binaryPath + "/" + "ndn-murmurd";
-			mumblePath = binaryPath + "/" + "Mumble";
-			kiwiPath = binaryPath + "/" + "kiwi";
-#else
-			audioPath = "ndn-murmurd";
-			mumblePath = "ndn-mumble";
-			kiwiPath = "kiwi";
-#endif
-#else // QT_NO_DEBUG
-#ifdef __APPLE__
-			audioPath = binaryPath + "/../../../" + "ndn-murmurd";
-			mumblePath = binaryPath + "/../../../Mumble.app/Contents/MacOS/" + "Mumble";
-			kiwiPath = binaryPath + "/../../../kiwi.app/Contents/MacOS/kiwi";
-#else
-			audioPath = binaryPath + "/ndn-murmurd";
-			mumblePath = binaryPath + "/ndn-mumble";
-			kiwiPath = binaryPath + "kiwi";
-#endif
-#endif // QT_NO_DEBUG
-
-		
-			audioProcess->start(audioPath);
-			mumbleProcess->start(mumblePath);
-
-		}
-		if (a->getVideo()) {
-			kiwiProcess = new QProcess(this);
-#ifdef QT_NO_DEBUG
-#ifdef __APPLE__
-			kiwiPath = binaryPath + "/" + "kiwi";
-#else
-			kiwiPath = "kiwi";
-#endif
-#else // QT_NO_DEBUG
-#ifdef __APPLE__
-			kiwiPath = binaryPath + "/../../../kiwi.app/Contents/MacOS/kiwi";
-#else
-			kiwiPath = binaryPath + "kiwi";
-#endif
-#endif // QT_NO_DEBUG
-			kiwiProcess->start(kiwiPath);
-		}
+	QString qsConfig = "<config><prefix>" + prefix + "</prefix><confName>";
+	Announcement *a = itemToAnnouncement[current];
+	if (a->getIsPrivate()) {
+		qsConfig += a->getOpaqueName() + "</confName>";
+		qsConfig += "<private>true</private>";
+		QByteArray confKey((const char *)a->conferenceKey, (int)sizeof(a->conferenceKey));	
+		QString qsConfKey = QString(confKey.toBase64());
+		qsConfig += "<confKey>" + qsConfKey + "</confKey>";
+		QByteArray sessionKey((const char *)a->audioSessionKey, (int)sizeof(a->audioSessionKey));
+		QString qsSessionKey = QString(sessionKey.toBase64());
+		qsConfig += "<sessionKey>" + qsSessionKey + "</sessionKey>";
 	}
+	else {
+		qsConfig += confName + "</confName>";
+		qsConfig += "<private>false</private>";
+	}
+	qsConfig += "<channelName>" + confName + "</channelName>";
+	qsConfig += "</config>";
+
+	QDomDocument doc;
+	QDir actDir(QDir::homePath() + "/" + ".actd");
+	if (!actDir.exists()) {
+		QDir homedir = QDir::home();
+		homedir.mkdir(".actd");
+	}
+	QString fileName = actDir.absolutePath() + "/" + ".config";
+	QFile config(fileName);
+	if (config.exists()) {
+		config.remove();
+	}
+
+	config.open(QIODevice::WriteOnly | QIODevice::Truncate);
+	QTextStream out (&config);
+
+	out << qsConfig;
+	// flush, maybe not needed, but sometimes release version of murmurd on iMac
+	// uses old conference name
+	config.flush();
+	config.close();
+
+}
+
+void MainWindow::joinAudioConference() {
+
+	mumbleCleanup();
+	writeConfig();
+	audioProcess = new QProcess(this);
+	mumbleProcess = new QProcess(this);
+
+#ifdef QT_NO_DEBUG
+#ifdef __APPLE__
+	audioPath = binaryPath + "/" + "ndn-murmurd";
+	mumblePath = binaryPath + "/" + "Mumble";
+	kiwiPath = binaryPath + "/" + "kiwi";
+#else
+	audioPath = "ndn-murmurd";
+	mumblePath = "ndn-mumble";
+	kiwiPath = "kiwi";
+#endif
+#else // QT_NO_DEBUG
+#ifdef __APPLE__
+	audioPath = binaryPath + "/../../../" + "ndn-murmurd";
+	mumblePath = binaryPath + "/../../../Mumble.app/Contents/MacOS/" + "Mumble";
+	kiwiPath = binaryPath + "/../../../kiwi.app/Contents/MacOS/kiwi";
+#else
+	audioPath = binaryPath + "/ndn-murmurd";
+	mumblePath = binaryPath + "/ndn-mumble";
+	kiwiPath = binaryPath + "kiwi";
+#endif
+#endif // QT_NO_DEBUG
+
+
+	audioProcess->start(audioPath);
+	mumbleProcess->start(mumblePath);
+}
+
+void MainWindow::joinVideoConference() {
+	writeConfig();
+	kiwiProcess = new QProcess(this);
+#ifdef QT_NO_DEBUG
+#ifdef __APPLE__
+	kiwiPath = binaryPath + "/" + "kiwi";
+#else
+	kiwiPath = "kiwi";
+#endif
+#else // QT_NO_DEBUG
+#ifdef __APPLE__
+	kiwiPath = binaryPath + "/../../../kiwi.app/Contents/MacOS/kiwi";
+#else
+	kiwiPath = binaryPath + "kiwi";
+#endif
+#endif // QT_NO_DEBUG
+	kiwiProcess->start(kiwiPath);
 }
 
 
@@ -321,17 +322,7 @@ void MainWindow::mumbleCleanup() {
 		audioProcess->deleteLater();
 		audioProcess = NULL;
 	}
-	if (kiwiProcess != NULL) {
-		kiwiProcess->kill();
-		kiwiProcess->deleteLater();
-		kiwiProcess = NULL;
-	}
-
 }
-
-void MainWindow::editConference() {
-}
-
 
 void MainWindow::dismissConference() {
 	QTreeWidgetItem *current = pubConfList->currentItem();

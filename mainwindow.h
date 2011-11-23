@@ -27,8 +27,9 @@ public:
 private slots:
 
 	void processItem();
-	void joinConference();
-	void editConference();
+	void joinAudioConference();
+	void joinVideoConference();
+	void writeConfig();
 	void dismissConference();
 	void newConference();
 	void exportCert();
@@ -60,8 +61,8 @@ private:
 	QPushButton *quitButton;
 
 
-	QPushButton *joinButton;
-	QPushButton *editButton;
+	QPushButton *joinAudioButton;
+	QPushButton *joinVideoButton;
 	QPushButton *dismissButton;
 
 	QCheckBox *listPrivate;

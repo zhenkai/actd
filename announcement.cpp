@@ -12,6 +12,7 @@ Announcement::Announcement()
 	email = QString("");
 	audio = false;
 	video = false;
+	text = false;
 	desc = QString("");
 	uuid = QString("");
 	memset(digest, 0, SHA_DIGEST_LENGTH);
