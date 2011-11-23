@@ -220,7 +220,7 @@ void MainWindow::writeConfig() {
 		critical("current is null");
 	}
 
-	QString confName = current->text(3);
+	QString confName = current->text(4);
 	QString qsConfig = "<config><prefix>" + prefix + "</prefix><confName>";
 	Announcement *a = itemToAnnouncement[current];
 	if (a->getIsPrivate()) {
@@ -408,7 +408,7 @@ void MainWindow::removeConferenceFromList(QString confName, QString organizer) {
 	while (!conferences.isEmpty()) {
 		QTreeWidgetItem *item = NULL;
 		item = conferences.takeFirst();
-		if (item != NULL && item->text(4) == organizer) {
+		if (item != NULL && item->text(5) == organizer) {
 			itemToAnnouncement.remove(item);
 			delete item;
 		}
