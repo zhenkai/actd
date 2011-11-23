@@ -270,28 +270,13 @@ void MainWindow::joinAudioConference() {
 	audioProcess = new QProcess(this);
 	mumbleProcess = new QProcess(this);
 
-#ifdef QT_NO_DEBUG
 #ifdef __APPLE__
-	audioPath = binaryPath + "/" + "ndn-murmurd";
-	mumblePath = binaryPath + "/" + "Mumble";
-	kiwiPath = binaryPath + "/" + "kiwi";
+	audioPath = "/Applications/Mumble.app/Contents/MacOS/ndn-murmurd";
+	mumblePath = "/Applications/Mumble.app/Contents/MacOS/Mumble";
 #else
-	audioPath = "ndn-murmurd";
-	mumblePath = "ndn-mumble";
-	kiwiPath = "kiwi";
+	audioPath = "/ndn-murmurd";
+	mumblePath = "/ndn-mumble";
 #endif
-#else // QT_NO_DEBUG
-#ifdef __APPLE__
-	audioPath = binaryPath + "/../../../" + "ndn-murmurd";
-	mumblePath = binaryPath + "/../../../Mumble.app/Contents/MacOS/" + "Mumble";
-	kiwiPath = binaryPath + "/../../../kiwi.app/Contents/MacOS/kiwi";
-#else
-	audioPath = binaryPath + "/ndn-murmurd";
-	mumblePath = binaryPath + "/ndn-mumble";
-	kiwiPath = binaryPath + "kiwi";
-#endif
-#endif // QT_NO_DEBUG
-
 
 	audioProcess->start(audioPath);
 	mumbleProcess->start(mumblePath);
@@ -300,22 +285,13 @@ void MainWindow::joinAudioConference() {
 void MainWindow::joinVideoConference() {
 	writeConfig();
 	kiwiProcess = new QProcess(this);
-#ifdef QT_NO_DEBUG
 #ifdef __APPLE__
-	kiwiPath = binaryPath + "/" + "kiwi";
+	kiwiPath = "/Applications/Kiwi.app/Contents/MacOS/kiwi";
 #else
 	kiwiPath = "kiwi";
 #endif
-#else // QT_NO_DEBUG
-#ifdef __APPLE__
-	kiwiPath = binaryPath + "/../../../kiwi.app/Contents/MacOS/kiwi";
-#else
-	kiwiPath = binaryPath + "kiwi";
-#endif
-#endif // QT_NO_DEBUG
 	kiwiProcess->start(kiwiPath);
 }
-
 
 void MainWindow::mumbleCleanup() {
 	if (mumbleProcess != NULL) {
