@@ -399,7 +399,7 @@ void MainWindow::addConferenceToList(Announcement *announce) {
 void MainWindow::removeConferenceFromList(QString confName, QString organizer) {
 
 	// remove from GUI
-	QList<QTreeWidgetItem *> conferences = pubConfList->findItems(confName, Qt::MatchFixedString, 3);
+	QList<QTreeWidgetItem *> conferences = pubConfList->findItems(confName, Qt::MatchFixedString, 4);
 	if (conferences.isEmpty()) {
 		QString qs = QString("no conference named %1 found!!").arg(confName);
 		critical(qs);
