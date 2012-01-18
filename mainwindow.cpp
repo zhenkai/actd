@@ -281,8 +281,8 @@ void MainWindow::joinAudioConference() {
 	audioPath = "/Applications/Mumble.app/Contents/MacOS/ndn-murmurd";
 	mumblePath = "/Applications/Mumble.app/Contents/MacOS/Mumble";
 #else
-	audioPath = "/ndn-murmurd";
-	mumblePath = "/ndn-mumble";
+	audioPath = "ndn-murmurd";
+	mumblePath = "ndn-mumble";
 #endif
 
 	audioProcess->start(audioPath);
