@@ -95,6 +95,7 @@ private:
 	struct ccn_closure *fetch_announce;
 	struct ccn_closure *fetch_private;
 	struct ccn_closure *handle_dismiss;
+	struct ccn_closure *fetch_remaining_closure;
 	struct ccn_keystore *keystore;
 	struct ccn_keystore *actd_keystore;
 	struct ccn_charbuf *keylocator;

@@ -388,7 +388,7 @@ void SessionEnum::fetchRemainingBlocks(struct ccn_closure *selfp, struct ccn_upc
 			handleEnumContent(content, data->len);
 		}
 		free(data);
-		free(selfp);
+		data = NULL;
 		return;
 	}
 
@@ -779,7 +779,7 @@ void SessionEnum::decodeAnnouncement(struct ccn_upcall_info *info, bool privateC
 		return;
 	}
 
-	struct ccn_closure *fetch_remaining_closure = (struct ccn_closure *)calloc(1, sizeof(struct ccn_closure));
+
 	struct fetched_data *data = (struct fetched_data *)calloc(1, sizeof(struct fetched_data));
 	data->value = (unsigned char *)calloc(1, len);
 	memcpy(data->value, value, len);
@@ -1604,6 +1604,7 @@ SessionEnum::SessionEnum() {
 	fetch_announce->p = &incoming_content;
 	fetch_private = (struct ccn_closure *) (calloc(1, sizeof(struct ccn_closure)));
 	fetch_private->p = &incoming_private_content;
+	fetch_remaining_closure = (struct ccn_closure *)calloc(1, sizeof(struct ccn_closure));
 	ccnConnect();
 	initKeystoreAndKeylocator();
 
