@@ -9,6 +9,13 @@
 #include "mainwindow.h"
 #include "debugbox.h"
 
+const int OwnerPos = 0;
+const int AudioPos = 1;
+const int VideoPos = 2;
+const int TextPos = 3;
+const int ConfNamePos = 4;
+const int OrganizerPos = 5;
+const int ContactPos = 6;
 
 MainWindow::MainWindow(char *argv[], QWidget *parent) 
 	:QDialog(parent)
@@ -24,12 +31,12 @@ MainWindow::MainWindow(char *argv[], QWidget *parent)
 	pubConfList->setRootIsDecorated(false);
 	pubConfList->setHeaderLabels(QStringList() << tr("")<<tr("")<<tr("")<<tr("")<<tr("Conference Name")<<tr("Organizer")<<tr("Contact"));
 	
-	pubConfList->setColumnWidth(0, 25);
-	pubConfList->setColumnWidth(1, 25);
-	pubConfList->setColumnWidth(2, 25);
-	pubConfList->setColumnWidth(3, 25);
-	pubConfList->setColumnWidth(4, 200);
-	pubConfList->setColumnWidth(5, 150);
+	pubConfList->setColumnWidth(OwnerPos, 25);
+	pubConfList->setColumnWidth(AudioPos, 25);
+	pubConfList->setColumnWidth(VideoPos, 25);
+	pubConfList->setColumnWidth(TextPos, 25);
+	pubConfList->setColumnWidth(ConfNamePos, 200);
+	pubConfList->setColumnWidth(ContactPos, 150);
 
 	confDesc = new QTextEdit;
 	confDesc->setReadOnly(true);
@@ -220,7 +227,7 @@ void MainWindow::writeConfig() {
 		critical("current is null");
 	}
 
-	QString confName = current->text(4);
+	QString confName = current->text(ConfNamePos);
 	QString qsConfig = "<config><prefix>" + prefix + "</prefix><confName>";
 	Announcement *a = itemToAnnouncement[current];
 	if (a->getIsPrivate()) {
@@ -348,7 +355,7 @@ void MainWindow::addConferenceToList(Announcement *announce) {
 
 	itemToAnnouncement.insert(item, announce);
 	
-	item->setText(4, announce->getConfName());
+	item->setText(ConfNamePos, announce->getConfName());
 	QString oDesc = announce->getDesc();
 	QString date = announce->getDate().toString("ddd MMM d"); 
 	QString start = announce->getTime().toString("h:mm AP"); 
@@ -359,33 +366,33 @@ void MainWindow::addConferenceToList(Announcement *announce) {
 
 	//item->setData(4, Qt::UserRole, desc);
 	
-	item->setText(5, announce->getOrganizer());
-	item->setText(6, announce->getEmail());
+	item->setText(OrganizerPos, announce->getOrganizer());
+	item->setText(ContactPos, announce->getEmail());
 
 
 	if (announce->getOwner() ) {
 		QPixmap setting(":/images/setting.png");
-		item->setIcon(0, setting);
+		item->setIcon(OwnerPos, setting);
 	} else {
 		if (announce->getIsPrivate()) {
 			QPixmap priv(":/images/priv.png");
-			item->setIcon(0, priv);
+			item->setIcon(OwnerPos, priv);
 		}
 	}
 
 	if (announce->getAudio()) {
 		QPixmap audio(":/images/audio.png");
-		item->setIcon(1, audio);
+		item->setIcon(AudioPos, audio);
 
 	}
 
 	if (announce->getVideo()) {
 		QPixmap video(":/images/video.png");
-		item->setIcon(2, video);
+		item->setIcon(VideoPos, video);
 	}
 	if (announce->getText()) {
 		QPixmap text(":/images/text.png");
-		item->setIcon(3, text);
+		item->setIcon(TextPos, text);
 	}
 
 	pubConfList->addTopLevelItem(item);
@@ -399,16 +406,20 @@ void MainWindow::addConferenceToList(Announcement *announce) {
 void MainWindow::removeConferenceFromList(QString confName, QString organizer) {
 
 	// remove from GUI
-	QList<QTreeWidgetItem *> conferences = pubConfList->findItems(confName, Qt::MatchFixedString, 4);
+	QList<QTreeWidgetItem *> conferences = pubConfList->findItems(confName,
+	Qt::MatchFixedString, ConfNamePos);
 	if (conferences.isEmpty()) {
 		QString qs = QString("no conference named %1 found!!").arg(confName);
-		critical(qs);
+		//critical(qs);
+		// complain but not crash
+		debug(qs);
+		return;
 	}
 
 	while (!conferences.isEmpty()) {
 		QTreeWidgetItem *item = NULL;
 		item = conferences.takeFirst();
-		if (item != NULL && item->text(5) == organizer) {
+		if (item != NULL && item->text(OrganizerPos) == organizer) {
 			itemToAnnouncement.remove(item);
 			delete item;
 		}
